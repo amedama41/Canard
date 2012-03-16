@@ -5,7 +5,8 @@
 
 namespace Canard {
   template <class PutPropMap, class GetPropMap>
-  class property_map_copy {
+  class property_map_copy
+  {
   public:
     typedef void result_type;
     typedef typename boost::property_traits<PutPropMap>::key_type param_type;
@@ -21,9 +22,9 @@ namespace Canard {
       BOOST_CONCEPT_ASSERT((boost::Convertible<get_value, put_value>));
     }
 
-    result_type operator()(const param_type& k) const
+    result_type operator()(param_type const& key) const
     {
-      put(put_pm, k, get(get_pm, k));
+      put(put_pm, k, get(get_pm, key));
     }
 
   private:
@@ -33,7 +34,7 @@ namespace Canard {
 
   template <class PutPropMap, class GetPropMap>
   inline property_map_copy<PutPropMap, GetPropMap>
-  make_property_map_copy(PutPropMap ppm, GetPropMap gpm)
+  make_property_map_copy(PutPropMap const& ppm, GetPropMap const& gpm)
   {
     return property_map_copy<PutPropMap, GetPropMap>(ppm, gpm);
   }

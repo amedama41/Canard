@@ -23,16 +23,22 @@ namespace Canard {
                 >::type>
               Base;
     public:
-        property_map_range(PropertyMap pmap, Range& range)
-          : Base(Canard::make_property_map_iterator(pmap, boost::begin(range)),
-                 Canard::make_property_map_iterator(pmap, boost::end(range)))
-        { }
+        property_map_range(PropertyMap const& pmap, Range& range)
+          : Base(
+              Canard::make_property_map_iterator(pmap, boost::begin(range)),
+              Canard::make_property_map_iterator(pmap, boost::end(range)))
+        {
+        }
     };
 
-    template <class T>
-    struct property_map_holder : boost::range_detail::holder<T>
+    template <class PropMap>
+    struct property_map_holder
+      : boost::range_detail::holder<PropMap>
     {
-      property_map_holder(T r) : boost::range_detail::holder<T>(r) { }
+      property_map_holder(PropMap const& pmap)
+        : boost::range_detail::holder<PropMap>(pmap)
+      {
+      }
     };
 
     template <class InputRng, class PropertyMap>
@@ -43,10 +49,10 @@ namespace Canard {
     }
 
     template <class InputRng, class PropertyMap>
-    inline property_map_range<PropertyMap, const InputRng>
-    operator|(const InputRng& r, const property_map_holder<PropertyMap>& p)
+    inline property_map_range<PropertyMap, InputRng const>
+    operator|(InputRng const& r, property_map_holder<PropertyMap> const& p)
     {
-      return property_map_range<PropertyMap, const InputRng>(p.val, r);
+      return property_map_range<PropertyMap, InputRng const>(p.val, r);
     }
   } // namespace range_detail
 
@@ -62,18 +68,18 @@ namespace Canard {
 
     template<class InputRange, class PropertyMap>
     inline property_map_range<PropertyMap, InputRange>
-    property_map(InputRange& rng, PropertyMap pmap)
+    property_map(InputRange& rng, PropertyMap const& pmap)
     {
       return range_detail::property_map_range<
                PropertyMap, InputRange>(pmap, rng);
     }
 
     template<class InputRange, class PropertyMap>
-    inline property_map_range<PropertyMap, const InputRange>
-    property_map(const InputRange& rng, PropertyMap pmap)
+    inline property_map_range<PropertyMap, InputRange const>
+    property_map(InputRange const& rng, PropertyMap const& pmap)
     {
       return range_detail::property_map_range<
-               PropertyMap, const InputRange>(pmap, rng);
+               PropertyMap, InputRange const>(pmap, rng);
     }
   } // namespace adaptors
 } // namespace Canard

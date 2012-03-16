@@ -14,7 +14,8 @@ namespace Canard {
 
     // Proxy Object for WritablePropertyMap
     template <class ReadWritePropertyMap>
-    class read_write_property_map_proxy {
+    class read_write_property_map_proxy
+    {
       typedef read_write_property_map_proxy<ReadWritePropertyMap> this_type;
       typedef boost::property_traits<ReadWritePropertyMap> PropertyTraits;
       typedef typename PropertyTraits::value_type value_type;
@@ -24,20 +25,22 @@ namespace Canard {
     public:
       read_write_property_map_proxy
       (ReadWritePropertyMap const& m, key_type const& k)
-        : m_map(m), m_key(k) { }
+        : m_map_(m), m_key_(k)
+      {
+      }
 
       this_type& operator=(value_type const& value)
       {
-        put(m_map, m_key, value);
+        put(m_map_, m_key_, value);
         return *this;
       }
 
       operator typename PropertyTraits::reference() const
-      { return get(m_map, m_key); }
+      { return get(m_map_, m_key_); }
 
     private:
-      ReadWritePropertyMap m_map;
-      key_type m_key;
+      ReadWritePropertyMap m_map_;
+      key_type m_key_;
     };
 
     // Switch for property_map_iterator::dereference_impl
@@ -76,23 +79,34 @@ namespace Canard {
                 Iterator, PropertyMap, Category>::type super_t;
 
     public:
-      property_map_iterator() { }
-      property_map_iterator(Iterator const& it, PropertyMap m)
+      property_map_iterator()
+      {
+      }
+
+      property_map_iterator(Iterator const& it, PropertyMap const& m)
         : super_t(it),
-          m_map(m) { }
+          m_map_(m)
+      {
+      }
 
     private:
       typename super_t::reference
       dereference_impl(lvalue_type) const
-      { return m_map[*(this->base_reference())]; }
+      {
+        return m_map_[*(this->base_reference())];
+      }
 
       typename super_t::reference
       dereference_impl(writable_type) const
-      { return typename super_t::reference(m_map, *(this->base_reference())); }
+      {
+        return typename super_t::reference(m_map_, *(this->base_reference()));
+      }
 
       typename super_t::reference
       dereference_impl(read_only_type) const
-      { return get(m_map, *(this->base_reference())); }
+      {
+        return get(m_map_, *(this->base_reference()));
+      }
 
       typename super_t::reference
       dereference() const
@@ -100,7 +114,8 @@ namespace Canard {
         return dereference_impl(Category());
       }
 
-      PropertyMap m_map;
+    private:
+      PropertyMap m_map_;
     };
   } // namespace detail
 
@@ -110,11 +125,13 @@ namespace Canard {
     typedef boost::is_convertible<
               typename boost::property_traits<PropertyMap>::category,
               boost::lvalue_property_map_tag
-            > is_lvalue_property_map;
+            >
+          is_lvalue_property_map;
     typedef boost::is_convertible<
               typename boost::property_traits<PropertyMap>::category,
               boost::writable_property_map_tag
-            > is_writable_property_map;
+            >
+          is_writable_property_map;
     typedef typename boost::mpl::if_<
               is_lvalue_property_map,
               detail::lvalue_type,
@@ -123,13 +140,14 @@ namespace Canard {
                 detail::writable_type,
                 detail::read_only_type
               >::type
-            >::type Category;
+            >::type
+          Category;
     typedef detail::property_map_iterator<Iterator, PropertyMap, Category> type;
   };
 
   template <class PropertyMap, class Iterator>
   typename property_map_iterator_generator<PropertyMap, Iterator>::type
-  make_property_map_iterator(PropertyMap pmap, Iterator iter)
+  make_property_map_iterator(PropertyMap const& pmap, Iterator const& iter)
   {
     return typename property_map_iterator_generator<
              PropertyMap, Iterator
@@ -140,7 +158,8 @@ namespace Canard {
   // make_property_map_iterator for ReadWritePropertyMap use Proxy Object
   template <class PropertyMap, class Iterator>
   detail::property_map_iterator<PropertyMap, Iterator, detail::read_only_type>
-  make_readable_property_map_iterator(PropertyMap pmap, Iterator iter)
+  make_readable_property_map_iterator
+  (PropertyMap const& pmap, Iterator const& iter)
   {
     return detail::property_map_iterator<
              PropertyMap, Iterator, detail::read_only_type

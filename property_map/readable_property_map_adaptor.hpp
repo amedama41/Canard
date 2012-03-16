@@ -11,19 +11,21 @@ namespace Canard {
         typename boost::remove_reference<
           typename boost::property_traits<PropertyMap>::reference
         >::type const&,
-        readable_property_map_adaptor<PropertyMap> >
+        readable_property_map_adaptor<PropertyMap>
+      >
   {
   public:
-    typedef typename boost::property_traits<PropertyMap>::key_type key_type;
     typedef typename boost::property_traits<PropertyMap>::value_type value_type;
     typedef typename boost::remove_reference<
       typename boost::property_traits<PropertyMap>::reference
     >::type const& reference;
+    typedef typename boost::property_traits<PropertyMap>::key_type key_type;
     typedef boost::readable_property_map_tag category;
 
     explicit readable_property_map_adaptor(PropertyMap const& pmap)
       : pmap_(pmap)
-    { }
+    {
+    }
 
     reference operator[](key_type const& key) const
     {
@@ -41,7 +43,7 @@ namespace Canard {
 
   template <class PropertyMap>
   readable_property_map_adaptor<PropertyMap>
-  convert_readable_property_map(PropertyMap pmap)
+  convert_readable_property_map(PropertyMap const& pmap)
   {
     return readable_property_map_adaptor<PropertyMap>(pmap);
   }
